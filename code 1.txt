@@ -1,0 +1,104 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+from sklearn.preprocessing import LabelEncoder
+
+
+np.random.seed(42)
+
+
+num_students = 1000
+
+data = {
+    'age': np.random.randint(18, 35, size=num_students),
+    'gender': np.random.choice(['Male', 'Female'], size=num_students),
+    'prior_education': np.random.choice(['High School', 'Vocational', 'College', 'None'], size=num_students),
+    'family_income': np.random.choice(['Low', 'Middle', 'High'], size=num_students),
+    'distance_from_center': np.random.randint(1, 100, size=num_students),  # in km
+    'hours_commuting': np.random.randint(0, 15, size=num_students),
+    'prior_qualifications': np.random.randint(0, 5, size=num_students),
+    'digital_literacy': np.random.randint(1, 10, size=num_students),
+    'motivation_level': np.random.randint(1, 10, size=num_students),
+    'learning_challenges': np.random.choice([0, 1], size=num_students, p=[0.7, 0.3]),
+    'will_join': np.random.choice([0, 1], size=num_students, p=[0.3, 0.7]),  # Target 1
+    'needs_help': np.random.choice([0, 1], size=num_students, p=[0.6, 0.4])  # Target 2
+}
+
+df = pd.DataFrame(data)
+
+
+label_encoders = {}
+categorical_cols = ['gender', 'prior_education', 'family_income']
+for col in categorical_cols:
+    le = LabelEncoder()
+    df[col] = le.fit_transform(df[col])
+    label_encoders[col] = le
+
+# Display sample data
+print("Sample of the dataset:")
+print(df.head())
+
+# Save dataset to CSV (optional)
+df.to_csv('program_participation_dataset.csv', index=False)
+
+
+
+# Prepare data for will_join prediction
+X_join = df.drop(columns=['will_join', 'needs_help'])
+y_join = df['will_join']
+
+# Split data
+X_train_join, X_test_join, y_train_join, y_test_join = train_test_split(
+    X_join, y_join, test_size=0.2, random_state=42)
+
+# Initialize and train model
+join_model = RandomForestClassifier(n_estimators=100, random_state=42)
+join_model.fit(X_train_join, y_train_join)
+
+# Make predictions
+join_pred = join_model.predict(X_test_join)
+
+# Evaluate model
+print("\nWill Join Program Prediction Results:")
+print(f"Accuracy: {accuracy_score(y_test_join, join_pred):.2f}")
+print("Classification Report:")
+print(classification_report(y_test_join, join_pred))
+
+
+
+# Prepare data for needs_help prediction (only for those who joined)
+df_joined = df[df['will_join'] == 1]
+X_help = df_joined.drop(columns=['will_join', 'needs_help'])
+y_help = df_joined['needs_help']
+
+
+X_train_help, X_test_help, y_train_help, y_test_help = train_test_split(
+    X_help, y_help, test_size=0.2, random_state=42)
+
+# Initialize and train model
+help_model = RandomForestClassifier(n_estimators=100, random_state=42)
+help_model.fit(X_train_help, y_train_help)
+
+# Make predictions
+help_pred = help_model.predict(X_test_help)
+
+
+print("\nNeeds Help to Graduate Prediction Results:")
+print(f"Accuracy: {accuracy_score(y_test_help, help_pred):.2f}")
+print("Classification Report:")
+print(classification_report(y_test_help, help_pred))
+
+
+print("\nFeature Importance for Will Join Model:")
+print(pd.DataFrame({
+    'feature': X_join.columns,
+    'importance': join_model.feature_importances_
+}).sort_values('importance', ascending=False))
+
+print("\nFeature Importance for Needs Help Model:")
+print(pd.DataFrame({
+    'feature': X_help.columns,
+    'importance': help_model.feature_importances_
+}).sort_values('importance', ascending=False))

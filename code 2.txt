@@ -1,0 +1,106 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression, LogisticRegression
+from sklearn.metrics import mean_squared_error, r2_score, accuracy_score, confusion_matrix, classification_report
+
+# Generate the same synthetic dataset
+np.random.seed(42)
+num_students = 1000
+
+data = {
+    'age': np.random.randint(18, 35, size=num_students),
+    'gender': np.random.choice([0, 1], size=num_students),  # 0=Female, 1=Male
+    'prior_education': np.random.choice([0, 1, 2, 3], size=num_students),  # 0=None, 1=HS, 2=Voc, 3=College
+    'family_income': np.random.choice([0, 1, 2], size=num_students),  # 0=Low, 1=Middle, 2=High
+    'distance_from_center': np.random.randint(1, 100, size=num_students),
+    'hours_commuting': np.random.randint(0, 15, size=num_students),
+    'prior_qualifications': np.random.randint(0, 5, size=num_students),
+    'digital_literacy': np.random.randint(1, 10, size=num_students),
+    'motivation_level': np.random.randint(1, 10, size=num_students),
+    'learning_challenges': np.random.choice([0, 1], size=num_students, p=[0.7, 0.3]),
+    'will_join': np.random.choice([0, 1], size=num_students, p=[0.3, 0.7]),
+    'needs_help': np.random.choice([0, 1], size=num_students, p=[0.6, 0.4])
+}
+
+df = pd.DataFrame(data)
+
+
+X_join = df.drop(columns=['will_join', 'needs_help'])
+y_join = df['will_join']  # Binary target (0/1)
+
+X_train_join, X_test_join, y_train_join, y_test_join = train_test_split(
+    X_join, y_join, test_size=0.2, random_state=42)
+
+# Linear Regression
+linreg_join = LinearRegression()
+linreg_join.fit(X_train_join, y_train_join)
+y_pred_linreg_join = linreg_join.predict(X_test_join)
+
+# Convert probabilities to binary predictions (threshold at 0.5)
+y_pred_binary = [1 if x >= 0.5 else 0 for x in y_pred_linreg_join]
+
+print("\nLINEAR REGRESSION RESULTS FOR WILL_JOIN:")
+print(f"R-squared: {r2_score(y_test_join, y_pred_linreg_join):.3f}")
+print(f"MSE: {mean_squared_error(y_test_join, y_pred_linreg_join):.3f}")
+print(f"Accuracy: {accuracy_score(y_test_join, y_pred_binary):.3f}")
+print("Confusion Matrix:")
+print(confusion_matrix(y_test_join, y_pred_binary))
+
+
+logreg_join = LogisticRegression(max_iter=1000)
+logreg_join.fit(X_train_join, y_train_join)
+y_pred_logreg_join = logreg_join.predict(X_test_join)
+
+print("\nLOGISTIC REGRESSION RESULTS FOR WILL_JOIN:")
+print(f"Accuracy: {accuracy_score(y_test_join, y_pred_logreg_join):.3f}")
+print("Classification Report:")
+print(classification_report(y_test_join, y_pred_logreg_join))
+print("Confusion Matrix:")
+print(confusion_matrix(y_test_join, y_pred_logreg_join))
+
+
+df_joined = df[df['will_join'] == 1]
+X_help = df_joined.drop(columns=['will_join', 'needs_help'])
+y_help = df_joined['needs_help']  # Binary target (0/1)
+
+X_train_help, X_test_help, y_train_help, y_test_help = train_test_split(
+    X_help, y_help, test_size=0.2, random_state=42)
+
+# Linear Regression
+linreg_help = LinearRegression()
+linreg_help.fit(X_train_help, y_train_help)
+y_pred_linreg_help = linreg_help.predict(X_test_help)
+
+# Convert probabilities to binary predictions
+y_pred_binary_help = [1 if x >= 0.5 else 0 for x in y_pred_linreg_help]
+
+print("\nLINEAR REGRESSION RESULTS FOR NEEDS_HELP:")
+print(f"R-squared: {r2_score(y_test_help, y_pred_linreg_help):.3f}")
+print(f"MSE: {mean_squared_error(y_test_help, y_pred_linreg_help):.3f}")
+print(f"Accuracy: {accuracy_score(y_test_help, y_pred_binary_help):.3f}")
+
+
+logreg_help = LogisticRegression(max_iter=1000)
+logreg_help.fit(X_train_help, y_train_help)
+y_pred_logreg_help = logreg_help.predict(X_test_help)
+
+print("\nLOGISTIC REGRESSION RESULTS FOR NEEDS_HELP:")
+print(f"Accuracy: {accuracy_score(y_test_help, y_pred_logreg_help):.3f}")
+print("Classification Report:")
+print(classification_report(y_test_help, y_pred_logreg_help))
+print("Confusion Matrix:")
+print(confusion_matrix(y_test_help, y_pred_logreg_help))
+
+
+print("\nLOGISTIC REGRESSION COEFFICIENTS (WILL_JOIN):")
+print(pd.DataFrame({
+    'Feature': X_join.columns,
+    'Coefficient': logreg_join.coef_[0]
+}).sort_values('Coefficient', ascending=False))
+
+print("\nLOGISTIC REGRESSION COEFFICIENTS (NEEDS_HELP):")
+print(pd.DataFrame({
+    'Feature': X_help.columns,
+    'Coefficient': logreg_help.coef_[0]
+}).sort_values('Coefficient', ascending=False))
