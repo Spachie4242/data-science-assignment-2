@@ -1,0 +1,51 @@
+1) Which type of machine learning algorithm would be most suitable for this task? Explain your reasoning.
+
+For predicting student enrollment and graduation success, supervised learning algorithms would be most suitable because the task involves labeled historical data (e.g., past student outcomes). Specific choices include:
+
+Classification algorithms (e.g., Logistic Regression, Random Forest, Gradient Boosting) if the goal is to predict binary outcomes (e.g., "will graduate yes/no").
+
+Regression algorithms (e.g., Linear Regression) if predicting continuous metrics (e.g., graduation probability scores).
+
+Time-to-event models (e.g., Cox Proportional Hazards) if analyzing dropout risks over time.
+
+These methods handle structured tabular data well, account for feature interactions, and provide interpretable insights (e.g., feature importance). For imbalanced data (few dropouts), techniques like SMOTE or class weighting may be needed.
+
+2) What features from the student data would be most relevant for predicting enrollment and graduation success?
+
+Relevant features could include:
+
+Academic History: GPA, standardized test scores, prior coursework, attendance records.
+
+Demographics: Age, socioeconomic status, first-generation student status (with privacy safeguards).
+
+Behavioral: Participation in extracurricular activities, use of academic support services.
+
+Institutional: Program difficulty, faculty-student ratio, financial aid availability.
+
+Environmental: Commute distance, family support indicators.
+
+
+3) How can you protect the privacy of student data while still using it to develop predictive models?
+
+Anonymization: Remove direct identifiers (names, IDs) and aggregate data where possible.
+
+Differential Privacy: Add statistical noise to queries to prevent re-identification.
+
+Federated Learning: Train models on decentralized data without raw data sharing.
+
+Access Controls: Restrict data access to authorized personnel and audit usage.
+
+Compliance: Adhere to regulations like FERPA (U.S.), GDPR (EU), or PIPEDA (Canada).
+
+
+4) How can you communicate the results of your model to educational institutions in a way that is actionable and informative?
+
+Visualizations: Use dashboards with intuitive charts (e.g., risk scores by student cohort, trends over time).
+
+Interpretability: Highlight key drivers (e.g., "Low GPA increases dropout risk by 30%") via SHAP or LIME.
+
+Actionable Recommendations: Pair predictions with interventions (e.g., "Target tutoring for students with X risk profile").
+
+Ethical Transparency: Disclose model limitations, potential biases, and confidence intervals.
+
+Pilot Programs: Suggest small-scale testing of model-driven interventions with measurable KPIs.
